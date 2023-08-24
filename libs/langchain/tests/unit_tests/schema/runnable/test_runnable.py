@@ -6,6 +6,7 @@ import pytest
 from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from syrupy import SnapshotAssertion
+from tenacity import RetryError, Retrying, retry_if_exception_type, stop_after_attempt
 
 from langchain import PromptTemplate
 from langchain.callbacks.manager import Callbacks
@@ -125,8 +126,8 @@ async def test_with_config(mocker: MockerFixture) -> None:
     ]
     spy.reset_mock()
 
-    fake_1 = RunnablePassthrough()
-    fake_2 = RunnablePassthrough()
+    fake_1: Runnable = RunnablePassthrough()
+    fake_2: Runnable = RunnablePassthrough()
     spy_seq_step = mocker.spy(fake_1.__class__, "invoke")
 
     sequence = fake_1.with_config(tags=["a-tag"]) | fake_2.with_config(
