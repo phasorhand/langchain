@@ -104,7 +104,6 @@ def patch_config(
     recursion_limit: Optional[int] = None,
     max_concurrency: Optional[int] = None,
     run_name: Optional[str] = None,
-    tags: Optional[List[str]] = None,
 ) -> RunnableConfig:
     config = ensure_config(config)
     if deep_copy_locals:
@@ -123,8 +122,6 @@ def patch_config(
         config["max_concurrency"] = max_concurrency
     if run_name is not None:
         config["run_name"] = run_name
-    if tags is not None:
-        config["tags"] = tags
     return config
 
 
