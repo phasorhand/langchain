@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from uuid import UUID
 
 import yaml
 
@@ -69,7 +68,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
             callbacks=config.get("callbacks"),
             tags=config.get("tags"),
             metadata=config.get("metadata"),
-            run_id=config.get("run_id"),
             run_name=config.get("run_name"),
             **kwargs,
         )
@@ -92,7 +90,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
             callbacks=config.get("callbacks"),
             tags=config.get("tags"),
             metadata=config.get("metadata"),
-            run_id=config.get("run_id"),
             run_name=config.get("run_name"),
             **kwargs,
         )
@@ -234,7 +231,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
         *,
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        run_id: Optional[UUID] = None,
         run_name: Optional[str] = None,
         include_run_info: bool = False,
     ) -> Dict[str, Any]:
@@ -277,7 +273,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
         run_manager = callback_manager.on_chain_start(
             dumpd(self),
             inputs,
-            run_id=run_id,
             name=run_name,
         )
         try:
@@ -305,7 +300,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
         *,
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        run_id: Optional[UUID] = None,
         run_name: Optional[str] = None,
         include_run_info: bool = False,
     ) -> Dict[str, Any]:
@@ -348,7 +342,6 @@ class Chain(Serializable, Runnable[Dict[str, Any], Dict[str, Any]], ABC):
         run_manager = await callback_manager.on_chain_start(
             dumpd(self),
             inputs,
-            run_id=run_id,
             name=run_name,
         )
         try:

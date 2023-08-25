@@ -40,6 +40,7 @@ from langchain.callbacks.openai_info import OpenAICallbackHandler
 from langchain.callbacks.stdout import StdOutCallbackHandler
 from langchain.callbacks.tracers.langchain import LangChainTracer
 from langchain.callbacks.tracers.langchain_v1 import LangChainTracerV1, TracerSessionV1
+from langchain.callbacks.tracers.run_collector import RunCollectorCallbackHandler
 from langchain.callbacks.tracers.stdout import ConsoleCallbackHandler
 from langchain.callbacks.tracers.wandb import WandbTracer
 from langchain.schema import (
@@ -74,6 +75,11 @@ tracing_v2_callback_var: ContextVar[
     Optional[LangChainTracer]
 ] = ContextVar(  # noqa: E501
     "tracing_callback_v2", default=None
+)
+run_collector_callback_var: ContextVar[
+    Optional[RunCollectorCallbackHandler]
+] = ContextVar(  # noqa: E501
+    "run_collector_callback", default=None
 )
 
 
@@ -182,6 +188,24 @@ def tracing_v2_enabled(
     tracing_v2_callback_var.set(cb)
     yield
     tracing_v2_callback_var.set(None)
+
+
+@contextmanager
+def collect_runs() -> Generator[RunCollectorCallbackHandler, None, None]:
+    """Get the RunCollectorCallbackHandler in a context manager.
+
+    Returns:
+        RunCollectorCallbackHandler: The RunCollectorCallbackHandler.
+
+    Example:
+        >>> with collect_runs() as cb:
+                chain.invoke({"foo": "bar"})
+                run_id = cb.traced_runs[0].run_id
+    """
+    cb = RunCollectorCallbackHandler()
+    run_collector_callback_var.set(cb)
+    yield cb
+    run_collector_callback_var.set(None)
 
 
 @contextmanager
@@ -1712,6 +1736,7 @@ def _configure(
     tracer_project = os.environ.get(
         "LANGCHAIN_PROJECT", os.environ.get("LANGCHAIN_SESSION", "default")
     )
+    run_collector = run_collector_callback_var.get()
     debug = _get_debug()
     if (
         verbose
@@ -1774,4 +1799,9 @@ def _configure(
             for handler in callback_manager.handlers
         ):
             callback_manager.add_handler(open_ai, True)
+        if run_collector is not None and not any(
+            handler == run_collector for handler in callback_manager.handlers
+        ):
+            # Only collects runs with execution_order == 1 anyway
+            callback_manager.add_handler(run_collector, False)
     return callback_manager
