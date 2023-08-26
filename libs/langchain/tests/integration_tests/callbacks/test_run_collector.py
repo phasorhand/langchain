@@ -4,7 +4,7 @@ from langchain.callbacks.manager import collect_runs
 from langchain.chains.transform import TransformChain
 
 
-def test_collect_runs():
+def test_collect_runs() -> None:
     chain = TransformChain(
         transform=lambda x: x, input_variables=["foo"], output_variables=["foo"]
     )
