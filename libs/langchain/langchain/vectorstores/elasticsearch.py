@@ -529,6 +529,7 @@ class ElasticsearchStore(VectorStore):
         api_key: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        auth_type: Optional[str] = "basic_auth",
     ) -> "Elasticsearch":
         try:
             import elasticsearch
@@ -555,7 +556,7 @@ class ElasticsearchStore(VectorStore):
         if api_key:
             connection_params["api_key"] = api_key
         elif username and password:
-            connection_params["basic_auth"] = (username, password)
+            connection_params[auth_type] = (username, password)
 
         es_client = elasticsearch.Elasticsearch(**connection_params)
         try:
